@@ -35,10 +35,14 @@ function kc_enqueue_assets() {
 		wp_enqueue_style( 'kc-homepage', KC_THEME_URI . '/assets/css/homepage.css', [ 'kc-product-card' ], KC_THEME_VERSION );
 	}
 
+	if ( is_shop() || is_product_category() || is_product() || is_cart() || is_checkout() || is_account_page() || is_search() || is_404() ) {
+		wp_enqueue_style( 'kc-woocommerce-pages', KC_THEME_URI . '/assets/css/woocommerce-pages.css', [ 'kc-product-card' ], KC_THEME_VERSION );
+	}
+
 	// WooCommerce's own AJAX add-to-cart + cart-fragments — real cart behavior,
 	// not a custom reimplementation. Needed here because product cards render
 	// on the homepage outside WooCommerce's normal shop/archive templates.
-	if ( is_front_page() || is_shop() || is_product_category() || is_product() ) {
+	if ( is_front_page() || is_shop() || is_product_category() || is_product() || is_search() || is_404() ) {
 		wp_enqueue_script( 'wc-add-to-cart' );
 		wp_enqueue_script( 'wc-cart-fragments' );
 	}
@@ -52,6 +56,7 @@ function kc_enqueue_assets() {
 			'searchNonce'      => wp_create_nonce( 'kc_search' ),
 			'quickViewNonce'   => wp_create_nonce( 'kc_quick_view' ),
 			'newsletterNonce'  => wp_create_nonce( 'kc_newsletter' ),
+			'checkoutUrl'      => function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : '',
 		]
 	);
 

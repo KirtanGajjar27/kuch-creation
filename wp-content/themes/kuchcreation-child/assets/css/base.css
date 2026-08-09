@@ -22,6 +22,7 @@ body {
 	font-size: var(--fs-body);
 	line-height: var(--lh-body);
 	-webkit-font-smoothing: antialiased;
+	overflow-x: hidden;
 }
 
 img,
@@ -121,6 +122,11 @@ p {
 	outline-offset: 2px;
 }
 
+/* Locks background scroll while an overlay/drawer/modal is open */
+body.kc-no-scroll {
+	overflow: hidden;
+}
+
 /* Buttons */
 .kc-btn {
 	display: inline-flex;
@@ -146,7 +152,7 @@ p {
 	color: #ffffff;
 }
 .kc-btn-primary:hover {
-	background: var(--color-accent);
+	background: var(--color-accent-hover);
 }
 .kc-btn-outline {
 	background: transparent;

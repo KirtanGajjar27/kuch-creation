@@ -44,7 +44,7 @@
 }
 @keyframes kc-marquee {
 	from { transform: translateX(0); }
-	to { transform: translateX(-33.333%); }
+	to { transform: translateX(-50%); }
 }
 @media (prefers-reduced-motion: reduce) {
 	.kc-announcement__track {
@@ -73,16 +73,33 @@
 .kc-header__inner {
 	display: flex;
 	align-items: center;
-	gap: var(--space-6);
+	gap: var(--space-3);
 	padding-block: var(--space-4);
 }
 
 .kc-logo {
 	font-family: var(--font-display);
 	font-weight: 700;
-	font-size: 1.25rem;
+	font-size: clamp(1rem, 0.85rem + 0.6vw, 1.25rem);
 	letter-spacing: var(--ls-tight);
 	margin-right: auto;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 46vw;
+}
+
+.kc-header__actions {
+	flex-shrink: 0;
+}
+
+@media (min-width: 480px) {
+	.kc-header__inner {
+		gap: var(--space-6);
+	}
+	.kc-logo {
+		max-width: none;
+	}
 }
 .kc-logo img {
 	max-height: 44px;

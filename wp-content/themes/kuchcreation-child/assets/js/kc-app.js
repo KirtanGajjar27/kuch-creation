@@ -25,12 +25,40 @@
 		}, 300 );
 	}
 
+	var lastFocusedEl = null;
+
+	function focusableElements( el ) {
+		return Array.prototype.slice.call(
+			el.querySelectorAll( 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])' )
+		).filter( function ( node ) { return node.offsetParent !== null; } );
+	}
+
+	function trapFocusKeydown( e, el ) {
+		if ( e.key !== 'Tab' ) return;
+		var focusables = focusableElements( el );
+		if ( ! focusables.length ) return;
+		var first = focusables[0];
+		var last = focusables[ focusables.length - 1 ];
+		if ( e.shiftKey && document.activeElement === first ) {
+			e.preventDefault();
+			last.focus();
+		} else if ( ! e.shiftKey && document.activeElement === last ) {
+			e.preventDefault();
+			first.focus();
+		}
+	}
+
 	function openPanel( el, openClass ) {
 		if ( ! el ) return;
+		lastFocusedEl = document.activeElement;
 		el.hidden = false;
 		requestAnimationFrame( function () {
 			el.classList.add( openClass );
+			var focusables = focusableElements( el );
+			if ( focusables.length ) focusables[0].focus();
 		} );
+		el._kcTrapHandler = function ( e ) { trapFocusKeydown( e, el ); };
+		el.addEventListener( 'keydown', el._kcTrapHandler );
 		openPanels.push( el );
 		showBackdrop();
 		document.body.classList.add( 'kc-no-scroll' );
@@ -40,11 +68,20 @@
 		if ( ! el ) return;
 		el.classList.remove( openClass );
 		openPanels = openPanels.filter( function ( p ) { return p !== el; } );
+		if ( el._kcTrapHandler ) {
+			el.removeEventListener( 'keydown', el._kcTrapHandler );
+			el._kcTrapHandler = null;
+		}
 		window.setTimeout( function () {
 			if ( ! el.classList.contains( openClass ) ) el.hidden = true;
 		}, 300 );
 		hideBackdropIfIdle();
-		if ( ! openPanels.length ) document.body.classList.remove( 'kc-no-scroll' );
+		if ( ! openPanels.length ) {
+			document.body.classList.remove( 'kc-no-scroll' );
+			if ( lastFocusedEl && typeof lastFocusedEl.focus === 'function' ) {
+				lastFocusedEl.focus();
+			}
+		}
 	}
 
 	function closeAllPanels() {
@@ -106,6 +143,7 @@
 				searchResults.innerHTML = '';
 				return;
 			}
+			searchResults.innerHTML = '<p class="kc-muted kc-small">Searching…</p>';
 			searchDebounce = window.setTimeout( function () {
 				var url = window.kcData.ajaxUrl + '?action=kc_search_products&nonce=' + encodeURIComponent( window.kcData.searchNonce ) + '&q=' + encodeURIComponent( term );
 				fetch( url )
@@ -259,19 +297,69 @@
 		} );
 	} );
 
+	/* Buy Now — add to cart via WC's own AJAX endpoint, then straight to checkout */
+	document.addEventListener( 'click', function ( e ) {
+		var btn = e.target.closest( '.kc-buy-now' );
+		if ( ! btn || ! window.wc_add_to_cart_params || ! window.kcData ) return;
+		e.preventDefault();
+		btn.classList.add( 'loading' );
+		var endpoint = window.wc_add_to_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'add_to_cart' );
+		var body = new URLSearchParams();
+		body.set( 'product_id', btn.dataset.productId );
+		body.set( 'quantity', '1' );
+		fetch( endpoint, { method: 'POST', body: body } )
+			.then( function ( r ) { return r.json(); } )
+			.then( function ( res ) {
+				if ( res && ! res.error ) {
+					window.location.href = window.kcData.checkoutUrl;
+				} else {
+					btn.classList.remove( 'loading' );
+					showToast( 'Could not add this item — please try again.' );
+				}
+			} )
+			.catch( function () { btn.classList.remove( 'loading' ); } );
+	} );
+
+	/* Shop sidebar filter toggle (mobile) */
+	var filterToggle = document.getElementById( 'kc-shop-filter-toggle' );
+	var shopSidebar = document.querySelector( '.kc-shop__sidebar' );
+	if ( filterToggle && shopSidebar ) {
+		filterToggle.addEventListener( 'click', function () {
+			shopSidebar.classList.toggle( 'is-open' );
+		} );
+	}
+
 	document.querySelectorAll( '.kc-carousel' ).forEach( function ( track ) {
-		var isDown = false, startX, scrollLeft;
+		var isDown = false, startX, scrollLeft, dragDistance = 0;
+
 		track.addEventListener( 'pointerdown', function ( e ) {
+			if ( e.pointerType === 'mouse' && e.button !== 0 ) return;
 			isDown = true;
+			dragDistance = 0;
 			startX = e.clientX;
 			scrollLeft = track.scrollLeft;
 		} );
-		[ 'pointerup', 'pointerleave' ].forEach( function ( evt ) {
+		[ 'pointerup', 'pointerleave', 'pointercancel' ].forEach( function ( evt ) {
 			track.addEventListener( evt, function () { isDown = false; } );
 		} );
 		track.addEventListener( 'pointermove', function ( e ) {
 			if ( ! isDown ) return;
-			track.scrollLeft = scrollLeft - ( e.clientX - startX );
+			var delta = e.clientX - startX;
+			dragDistance = Math.max( dragDistance, Math.abs( delta ) );
+			track.scrollLeft = scrollLeft - delta;
 		} );
+		// A real drag (beyond a tap's natural jitter) shouldn't also fire the
+		// underlying product link's click — capture-phase so it runs before
+		// the link's own handler.
+		track.addEventListener(
+			'click',
+			function ( e ) {
+				if ( dragDistance > 8 ) {
+					e.preventDefault();
+					e.stopPropagation();
+				}
+			},
+			true
+		);
 	} );
 } )();

@@ -21,7 +21,6 @@
 	<div class="kc-announcement__track">
 		<span><?php echo esc_html( $announcement ); ?></span>
 		<span aria-hidden="true"><?php echo esc_html( $announcement ); ?></span>
-		<span aria-hidden="true"><?php echo esc_html( $announcement ); ?></span>
 	</div>
 </div>
 
@@ -68,6 +67,7 @@
 	<button type="button" class="kc-overlay-close" id="kc-search-close" aria-label="<?php esc_attr_e( 'Close search', 'kuchcreation' ); ?>">&times;</button>
 	<div class="kc-search-overlay__inner">
 		<form role="search" method="get" class="kc-search-form" action="<?php echo esc_url( home_url( '/' ) ); ?>">
+			<label for="kc-search-input" class="kc-visually-hidden"><?php esc_html_e( 'Search products', 'kuchcreation' ); ?></label>
 			<input type="search" name="s" id="kc-search-input" placeholder="<?php esc_attr_e( 'Search for necklaces, cuffs, hair accessories…', 'kuchcreation' ); ?>" autocomplete="off">
 			<input type="hidden" name="post_type" value="product">
 		</form>

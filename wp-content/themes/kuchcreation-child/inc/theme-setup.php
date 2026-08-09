@@ -44,7 +44,7 @@ add_action( 'after_setup_theme', 'kc_theme_setup' );
  */
 function kc_is_custom_storefront_template() {
 	return is_front_page() || is_shop() || is_product() || is_product_category()
-		|| is_cart() || is_checkout() || is_account_page() || is_search();
+		|| is_cart() || is_checkout() || is_account_page() || is_search() || is_404();
 }
 
 /**
@@ -74,6 +74,92 @@ function kc_dequeue_builder_assets_on_storefront() {
 }
 add_action( 'wp_print_styles', 'kc_dequeue_builder_assets_on_storefront', 100 );
 add_action( 'wp_print_scripts', 'kc_dequeue_builder_assets_on_storefront', 100 );
+
+/**
+ * Basic meta description — nothing on this stack (no SEO plugin installed)
+ * emits one otherwise, and the spec calls for meta-friendly structure.
+ */
+function kc_meta_description() {
+	$description = '';
+
+	if ( is_front_page() ) {
+		$description = __( 'Handmade jewellery, cuffs and hair accessories in the mirror-work tradition of Kutch — made to order in small batches by Kuch Creation.', 'kuchcreation' );
+	} elseif ( is_product() ) {
+		global $product;
+		if ( $product instanceof WC_Product ) {
+			$description = wp_strip_all_tags( $product->get_short_description() ?: $product->get_description() );
+		}
+	} elseif ( is_product_category() || is_tax() ) {
+		$description = wp_strip_all_tags( term_description() );
+	} elseif ( is_singular() ) {
+		$description = wp_strip_all_tags( get_the_excerpt() );
+	}
+
+	$description = trim( $description );
+	if ( ! $description ) {
+		return;
+	}
+
+	printf( '<meta name="description" content="%s">' . "\n", esc_attr( wp_trim_words( $description, 30 ) ) );
+}
+add_action( 'wp_head', 'kc_meta_description', 1 );
+
+/**
+ * Open Graph tags for link previews — built from the same real data as the
+ * meta description above, no separate/fake content.
+ */
+function kc_open_graph_tags() {
+	$title = get_bloginfo( 'name' );
+	$image = '';
+
+	if ( is_product() ) {
+		global $product;
+		if ( $product instanceof WC_Product ) {
+			$title = $product->get_name();
+			$image = wp_get_attachment_image_url( $product->get_image_id(), 'large' );
+		}
+	} elseif ( is_singular() ) {
+		$title = get_the_title();
+		if ( has_post_thumbnail() ) {
+			$image = get_the_post_thumbnail_url( null, 'large' );
+		}
+	}
+
+	printf( '<meta property="og:site_name" content="%s">' . "\n", esc_attr( get_bloginfo( 'name' ) ) );
+	printf( '<meta property="og:title" content="%s">' . "\n", esc_attr( $title ) );
+	printf( '<meta property="og:url" content="%s">' . "\n", esc_url( home_url( add_query_arg( null, null ) ) ) );
+	printf( '<meta property="og:type" content="%s">' . "\n", is_product() ? 'product' : 'website' );
+	if ( $image ) {
+		printf( '<meta property="og:image" content="%s">' . "\n", esc_url( $image ) );
+	}
+}
+add_action( 'wp_head', 'kc_open_graph_tags', 2 );
+
+/**
+ * Organization/WebSite structured data on the homepage — Product schema is
+ * handled separately in inc/woocommerce.php for single-product pages.
+ */
+function kc_organization_structured_data() {
+	if ( ! is_front_page() ) {
+		return;
+	}
+
+	$logo_id = get_theme_mod( 'custom_logo' );
+
+	$data = [
+		'@context' => 'https://schema.org',
+		'@type'    => 'Organization',
+		'name'     => get_bloginfo( 'name' ),
+		'url'      => home_url( '/' ),
+	];
+
+	if ( $logo_id ) {
+		$data['logo'] = wp_get_attachment_image_url( $logo_id, 'full' );
+	}
+
+	echo '<script type="application/ld+json">' . wp_json_encode( $data ) . '</script>' . "\n"; // phpcs:ignore
+}
+add_action( 'wp_head', 'kc_organization_structured_data' );
 
 /**
  * Prints the primary nav. Falls back to Shop + real product category links

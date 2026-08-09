@@ -49,7 +49,7 @@
 	color: #fff;
 }
 .kc-badge--sale {
-	background: var(--color-accent);
+	background: var(--color-accent-hover);
 }
 .kc-badge--bestseller {
 	background: var(--color-text);
