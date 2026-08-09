@@ -15,6 +15,15 @@ function kc_theme_setup() {
 		'html5',
 		[ 'search-form', 'comment-form', 'comment-list', 'gallery', 'caption', 'style', 'script' ]
 	);
+	add_theme_support(
+		'custom-logo',
+		[
+			'height'      => 64,
+			'width'       => 200,
+			'flex-height' => true,
+			'flex-width'  => true,
+		]
+	);
 
 	register_nav_menus(
 		[
@@ -65,3 +74,46 @@ function kc_dequeue_builder_assets_on_storefront() {
 }
 add_action( 'wp_print_styles', 'kc_dequeue_builder_assets_on_storefront', 100 );
 add_action( 'wp_print_scripts', 'kc_dequeue_builder_assets_on_storefront', 100 );
+
+/**
+ * Prints the primary nav. Falls back to Shop + real product category links
+ * when no menu has been assigned yet in Appearance > Menus, so navigation
+ * is never empty on a fresh install.
+ */
+function kc_primary_menu( $mobile = false ) {
+	$container_class = $mobile ? 'kc-mobile-menu__list' : 'kc-nav__list';
+
+	if ( has_nav_menu( 'primary' ) ) {
+		wp_nav_menu(
+			[
+				'theme_location' => 'primary',
+				'container'      => false,
+				'menu_class'     => $container_class,
+				'depth'          => 2,
+			]
+		);
+		return;
+	}
+
+	$shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/shop/' );
+	$links    = [
+		[ 'label' => __( 'Shop', 'kuchcreation' ), 'url' => $shop_url ],
+	];
+
+	if ( function_exists( 'get_term_link' ) ) {
+		foreach ( [ 'jewellery' => __( 'Jewellery', 'kuchcreation' ), 'hair-accessories' => __( 'Hair Accessories', 'kuchcreation' ) ] as $slug => $label ) {
+			$term = get_term_by( 'slug', $slug, 'product_cat' );
+			if ( $term && ! is_wp_error( $term ) ) {
+				$links[] = [ 'label' => $label, 'url' => get_term_link( $term ) ];
+			}
+		}
+	}
+
+	$links[] = [ 'label' => __( 'About', 'kuchcreation' ), 'url' => home_url( '/about-us/' ) ];
+
+	echo '<ul class="' . esc_attr( $container_class ) . '">';
+	foreach ( $links as $link ) {
+		printf( '<li><a href="%s">%s</a></li>', esc_url( $link['url'] ), esc_html( $link['label'] ) );
+	}
+	echo '</ul>';
+}

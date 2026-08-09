@@ -14,6 +14,8 @@ define( 'KC_THEME_URI', get_stylesheet_directory_uri() );
 require_once KC_THEME_DIR . '/inc/theme-setup.php';
 require_once KC_THEME_DIR . '/inc/woocommerce.php';
 require_once KC_THEME_DIR . '/inc/customizer.php';
+require_once KC_THEME_DIR . '/inc/ajax.php';
+require_once KC_THEME_DIR . '/inc/newsletter.php';
 
 /**
  * Enqueue parent (Avada) stylesheet, then our own design-system stylesheets on top.
@@ -25,5 +27,38 @@ function kc_enqueue_assets() {
 
 	wp_enqueue_style( 'kc-tokens', KC_THEME_URI . '/assets/css/tokens.css', [ 'avada-parent-style' ], KC_THEME_VERSION );
 	wp_enqueue_style( 'kc-base', KC_THEME_URI . '/assets/css/base.css', [ 'kc-tokens' ], KC_THEME_VERSION );
+	wp_enqueue_style( 'kc-header', KC_THEME_URI . '/assets/css/header.css', [ 'kc-base' ], KC_THEME_VERSION );
+	wp_enqueue_style( 'kc-footer', KC_THEME_URI . '/assets/css/footer.css', [ 'kc-base' ], KC_THEME_VERSION );
+	wp_enqueue_style( 'kc-product-card', KC_THEME_URI . '/assets/css/product-card.css', [ 'kc-base' ], KC_THEME_VERSION );
+
+	if ( is_front_page() ) {
+		wp_enqueue_style( 'kc-homepage', KC_THEME_URI . '/assets/css/homepage.css', [ 'kc-product-card' ], KC_THEME_VERSION );
+	}
+
+	// WooCommerce's own AJAX add-to-cart + cart-fragments — real cart behavior,
+	// not a custom reimplementation. Needed here because product cards render
+	// on the homepage outside WooCommerce's normal shop/archive templates.
+	if ( is_front_page() || is_shop() || is_product_category() || is_product() ) {
+		wp_enqueue_script( 'wc-add-to-cart' );
+		wp_enqueue_script( 'wc-cart-fragments' );
+	}
+
+	wp_enqueue_script( 'kc-app', KC_THEME_URI . '/assets/js/kc-app.js', [ 'jquery' ], KC_THEME_VERSION, true );
+	wp_localize_script(
+		'kc-app',
+		'kcData',
+		[
+			'ajaxUrl'          => admin_url( 'admin-ajax.php' ),
+			'searchNonce'      => wp_create_nonce( 'kc_search' ),
+			'quickViewNonce'   => wp_create_nonce( 'kc_quick_view' ),
+			'newsletterNonce'  => wp_create_nonce( 'kc_newsletter' ),
+		]
+	);
+
+	if ( kc_is_custom_storefront_template() ) {
+		wp_enqueue_script( 'kc-gsap', KC_THEME_URI . '/assets/js/vendor/gsap.min.js', [], KC_THEME_VERSION, true );
+		wp_enqueue_script( 'kc-gsap-scrolltrigger', KC_THEME_URI . '/assets/js/vendor/ScrollTrigger.min.js', [ 'kc-gsap' ], KC_THEME_VERSION, true );
+		wp_enqueue_script( 'kc-scroll-reveal', KC_THEME_URI . '/assets/js/scroll-reveal.js', [ 'kc-gsap-scrolltrigger' ], KC_THEME_VERSION, true );
+	}
 }
 add_action( 'wp_enqueue_scripts', 'kc_enqueue_assets', 20 );

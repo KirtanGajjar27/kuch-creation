@@ -39,6 +39,22 @@ function kc_customize_register( WP_Customize_Manager $wp_customize ) {
 			]
 		)
 	);
+
+	$wp_customize->add_setting(
+		'kc_announcement_text',
+		[
+			'default'           => __( 'Free Shipping on Orders Above ₹999', 'kuchcreation' ),
+			'sanitize_callback' => 'sanitize_text_field',
+		]
+	);
+	$wp_customize->add_control(
+		'kc_announcement_text',
+		[
+			'label'   => __( 'Announcement Bar Text', 'kuchcreation' ),
+			'section' => 'kc_brand',
+			'type'    => 'text',
+		]
+	);
 }
 add_action( 'customize_register', 'kc_customize_register' );
 
