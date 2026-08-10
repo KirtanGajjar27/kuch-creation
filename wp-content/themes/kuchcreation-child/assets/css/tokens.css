@@ -17,8 +17,8 @@
 	--color-error: #b3423a;
 
 	/* Typography */
-	--font-display: 'Manrope', 'Segoe UI', system-ui, sans-serif;
-	--font-body: 'Inter', 'Segoe UI', system-ui, sans-serif;
+	--font-display: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
+	--font-body: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
 
 	--fs-display: clamp(2.75rem, 2rem + 3vw, 5rem);
 	--fs-h1: clamp(2.25rem, 1.7rem + 2.2vw, 3.75rem);

@@ -19,6 +19,18 @@ require_once KC_THEME_DIR . '/inc/newsletter.php';
 require_once KC_THEME_DIR . '/inc/account.php';
 
 /**
+ * Preconnect to Google Fonts so the DM Sans request doesn't wait on DNS/TLS.
+ */
+function kc_resource_hints( $urls, $relation_type ) {
+	if ( 'preconnect' === $relation_type ) {
+		$urls[] = [ 'href' => 'https://fonts.gstatic.com', 'crossorigin' ];
+		$urls[] = 'https://fonts.googleapis.com';
+	}
+	return $urls;
+}
+add_filter( 'wp_resource_hints', 'kc_resource_hints', 10, 2 );
+
+/**
  * Enqueue parent (Avada) stylesheet, then our own design-system stylesheets on top.
  * Storefront-critical pages (front page, shop, product, cart, checkout, account)
  * additionally drop Avada/Fusion's bundled CSS/JS — see inc/theme-setup.php.
@@ -26,7 +38,8 @@ require_once KC_THEME_DIR . '/inc/account.php';
 function kc_enqueue_assets() {
 	wp_enqueue_style( 'avada-parent-style', get_template_directory_uri() . '/style.css', [], KC_THEME_VERSION );
 
-	wp_enqueue_style( 'kc-tokens', KC_THEME_URI . '/assets/css/tokens.css', [ 'avada-parent-style' ], KC_THEME_VERSION );
+	wp_enqueue_style( 'kc-google-fonts', 'https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap', [], null );
+	wp_enqueue_style( 'kc-tokens', KC_THEME_URI . '/assets/css/tokens.css', [ 'avada-parent-style', 'kc-google-fonts' ], KC_THEME_VERSION );
 	wp_enqueue_style( 'kc-base', KC_THEME_URI . '/assets/css/base.css', [ 'kc-tokens' ], KC_THEME_VERSION );
 	wp_enqueue_style( 'kc-header', KC_THEME_URI . '/assets/css/header.css', [ 'kc-base' ], KC_THEME_VERSION );
 	wp_enqueue_style( 'kc-footer', KC_THEME_URI . '/assets/css/footer.css', [ 'kc-base' ], KC_THEME_VERSION );
