@@ -320,6 +320,36 @@
 			.catch( function () { btn.classList.remove( 'loading' ); } );
 	} );
 
+	/* Login/Register tab switcher */
+	var authTabs = document.querySelectorAll( '[data-kc-auth-tab]' );
+	if ( authTabs.length ) {
+		authTabs.forEach( function ( tab ) {
+			tab.addEventListener( 'click', function () {
+				var target = tab.dataset.kcAuthTab;
+				authTabs.forEach( function ( t ) {
+					var isActive = t === tab;
+					t.classList.toggle( 'is-active', isActive );
+					t.setAttribute( 'aria-selected', isActive ? 'true' : 'false' );
+				} );
+				var loginPanel = document.getElementById( 'kc-panel-login' );
+				var registerPanel = document.getElementById( 'kc-panel-register' );
+				if ( loginPanel ) loginPanel.hidden = target !== 'login';
+				if ( registerPanel ) registerPanel.hidden = target !== 'register';
+			} );
+		} );
+	}
+
+	/* Password visibility toggle */
+	document.querySelectorAll( '[data-kc-toggle-password]' ).forEach( function ( btn ) {
+		btn.addEventListener( 'click', function () {
+			var input = document.getElementById( btn.dataset.kcTogglePassword );
+			if ( ! input ) return;
+			var isHidden = input.type === 'password';
+			input.type = isHidden ? 'text' : 'password';
+			btn.setAttribute( 'aria-label', isHidden ? 'Hide password' : 'Show password' );
+		} );
+	} );
+
 	/* Shop sidebar filter toggle (mobile) */
 	var filterToggle = document.getElementById( 'kc-shop-filter-toggle' );
 	var shopSidebar = document.querySelector( '.kc-shop__sidebar' );

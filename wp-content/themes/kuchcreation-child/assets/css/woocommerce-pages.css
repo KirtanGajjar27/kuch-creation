@@ -49,6 +49,42 @@
 	list-style: none;
 }
 
+/* WooCommerce's block-based notice component (used for account/password
+   messages even on otherwise-classic pages) — restyled to match the rest
+   of the site instead of its loud default green/red/yellow. */
+.wc-block-components-notice-banner {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--space-3);
+	margin: 0 0 var(--space-6);
+	padding: var(--space-4) var(--space-5);
+	border-radius: var(--radius-sm);
+	background: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-left: 3px solid var(--color-text);
+	color: var(--color-text);
+}
+.wc-block-components-notice-banner.is-success {
+	border-left-color: var(--color-success);
+}
+.wc-block-components-notice-banner.is-error {
+	border-left-color: var(--color-error);
+}
+.wc-block-components-notice-banner.is-info {
+	border-left-color: var(--color-muted);
+}
+.wc-block-components-notice-banner > svg {
+	flex-shrink: 0;
+	width: 20px;
+	height: 20px;
+	fill: currentColor;
+	color: var(--color-text);
+	margin-top: 2px;
+}
+.wc-block-components-notice-banner__content {
+	font-size: var(--fs-small);
+}
+
 /* ===== Shop / Archive ===== */
 .kc-shop__header {
 	padding-block: var(--space-4) var(--space-8);

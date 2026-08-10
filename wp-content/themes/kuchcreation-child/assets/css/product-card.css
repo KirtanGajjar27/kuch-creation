@@ -19,10 +19,11 @@
 }
 .kc-product-card__image--hover {
 	opacity: 0;
+	z-index: 1;
 }
-.kc-product-card__media:hover .kc-product-card__image--primary {
-	opacity: 0;
-}
+/* Only the hover image fades in on top — the primary image never fades
+   out on its own, so a product with no second photo just keeps showing
+   its one image on hover instead of going blank. */
 .kc-product-card__media:hover .kc-product-card__image--hover {
 	opacity: 1;
 }

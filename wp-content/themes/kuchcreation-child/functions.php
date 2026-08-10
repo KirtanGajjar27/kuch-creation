@@ -16,6 +16,7 @@ require_once KC_THEME_DIR . '/inc/woocommerce.php';
 require_once KC_THEME_DIR . '/inc/customizer.php';
 require_once KC_THEME_DIR . '/inc/ajax.php';
 require_once KC_THEME_DIR . '/inc/newsletter.php';
+require_once KC_THEME_DIR . '/inc/account.php';
 
 /**
  * Enqueue parent (Avada) stylesheet, then our own design-system stylesheets on top.
@@ -37,6 +38,10 @@ function kc_enqueue_assets() {
 
 	if ( is_shop() || is_product_category() || is_product() || is_cart() || is_checkout() || is_account_page() || is_search() || is_404() ) {
 		wp_enqueue_style( 'kc-woocommerce-pages', KC_THEME_URI . '/assets/css/woocommerce-pages.css', [ 'kc-product-card' ], KC_THEME_VERSION );
+	}
+
+	if ( is_account_page() && ! is_user_logged_in() ) {
+		wp_enqueue_style( 'kc-auth', KC_THEME_URI . '/assets/css/auth.css', [ 'kc-woocommerce-pages' ], KC_THEME_VERSION );
 	}
 
 	// WooCommerce's own AJAX add-to-cart + cart-fragments — real cart behavior,

@@ -1,0 +1,172 @@
+/* Login / Register split-screen (woocommerce/myaccount/form-login.php) */
+.kc-auth {
+	display: grid;
+	grid-template-columns: 1fr;
+	min-height: 70vh;
+	margin-inline: calc(var(--container-pad) * -1);
+}
+
+.kc-auth__media {
+	display: none;
+	position: relative;
+}
+.kc-auth__image {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+.kc-auth__media::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(180deg, rgba(17,17,17,0.15), rgba(17,17,17,0.75));
+}
+.kc-auth__media-copy {
+	position: relative;
+	z-index: 1;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	padding: var(--space-10);
+	color: #fff;
+}
+.kc-auth__media-copy .kc-caption {
+	color: rgba(255, 255, 255, 0.75);
+}
+.kc-auth__media-copy .kc-h3 {
+	color: #fff;
+	max-width: 22ch;
+	margin-bottom: var(--space-5);
+}
+.kc-auth__perks {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+	font-size: var(--fs-small);
+	color: rgba(255, 255, 255, 0.9);
+}
+.kc-auth__perks li {
+	padding-left: var(--space-5);
+	position: relative;
+}
+.kc-auth__perks li::before {
+	content: "✓";
+	position: absolute;
+	left: 0;
+	color: var(--color-accent);
+}
+
+.kc-auth__panel {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: var(--space-10) var(--container-pad);
+}
+.kc-auth__panel-inner {
+	width: 100%;
+	max-width: 420px;
+}
+
+.kc-auth__tabs {
+	display: flex;
+	gap: var(--space-6);
+	margin-bottom: var(--space-8);
+	border-bottom: 1px solid var(--color-border);
+}
+.kc-auth__tab {
+	padding-block: var(--space-3);
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: var(--fs-h4);
+	color: var(--color-muted);
+	position: relative;
+}
+.kc-auth__tab.is-active {
+	color: var(--color-text);
+}
+.kc-auth__tab.is-active::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: -1px;
+	height: 2px;
+	background: var(--color-accent);
+}
+
+.kc-auth__form-wrap[hidden] {
+	display: none;
+}
+.kc-auth__form-wrap h1 {
+	margin-bottom: var(--space-1);
+}
+.kc-auth__form-wrap > p.kc-muted {
+	margin-bottom: var(--space-6);
+}
+
+.kc-auth-form .woocommerce-form-row {
+	margin-bottom: var(--space-4);
+}
+.kc-auth-form label {
+	display: block;
+	font-size: var(--fs-small);
+	margin-bottom: var(--space-1);
+}
+.kc-auth-form .required {
+	color: var(--color-error);
+}
+.kc-password-row {
+	position: relative;
+}
+.kc-password-toggle {
+	position: absolute;
+	right: var(--space-3);
+	bottom: var(--space-3);
+	color: var(--color-muted);
+}
+.kc-password-toggle svg {
+	width: 18px;
+	height: 18px;
+}
+.kc-password-toggle:hover {
+	color: var(--color-text);
+}
+
+.kc-auth-form__footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: var(--space-3);
+	margin-top: var(--space-5);
+}
+.kc-auth-form .woocommerce-form-login__submit,
+.kc-auth-form .woocommerce-form-register__submit {
+	width: 100%;
+	padding: var(--space-3) var(--space-6);
+}
+.kc-auth-form__footer .woocommerce-form-login__submit {
+	width: auto;
+}
+.kc-auth-form .woocommerce-LostPassword {
+	margin-top: var(--space-4);
+	font-size: var(--fs-small);
+}
+.kc-auth-form .woocommerce-LostPassword a {
+	text-decoration: underline;
+}
+
+@media (min-width: 1024px) {
+	.kc-auth {
+		grid-template-columns: 1fr 1fr;
+	}
+	.kc-auth__media {
+		display: block;
+	}
+}
